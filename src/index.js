@@ -22,8 +22,14 @@ app.get("/", (req, res) => {
 
 io.on("connection", (socket) => {
   socket.emit("welcomeMessage", "Welcome to the chat!");
+  socket.broadcast.emit("message", "A new user has joined!");
+
   socket.on("messageChat", (message) => {
-    io.emit("anotherMessage", message);
+    io.emit("message", message);
+  });
+
+  socket.on("disconnect", () => {
+    io.emit("message", "A user has left!");
   });
 });
 

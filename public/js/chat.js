@@ -6,7 +6,7 @@ socket.on("welcomeMessage", (message) => {
   console.log("The message received was: " + message);
 });
 
-socket.on("anotherMessage", (message) => {
+socket.on("message", (message) => {
   console.log(message);
 });
 
