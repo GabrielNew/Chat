@@ -3,6 +3,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import http from "http";
 import { Server } from "socket.io";
+import { Filter } from "bad-words";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -24,14 +25,21 @@ io.on("connection", (socket) => {
   socket.emit("welcomeMessage", "Welcome to the chat!");
   socket.broadcast.emit("message", "A new user has joined!");
 
-  socket.on("messageChat", (message) => {
+  socket.on("messageChat", (message, callback) => {
+    const filter = new Filter();
+
+    if (filter.isProfane(message)) {
+      return callback("ERROR");
+    }
     io.emit("message", message);
+    callback("Delivered");
   });
 
-  socket.on("sendLocation", (location) => {
+  socket.on("sendLocation", (location, callback) => {
     let link = `https://www.google.com/maps/search/?api=1&${location.coords.latitude},${location.coords.longitude}`;
     let msg = `Location: lat is ${location.coords.latitude}, long is ${location.coords.longitude}`;
     io.emit("message", link);
+    callback();
   });
 
   socket.on("disconnect", () => {

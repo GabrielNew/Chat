@@ -13,7 +13,12 @@ socket.on("message", (message) => {
 document.querySelector("#btnSendMessage").addEventListener("click", (e) => {
   e.preventDefault();
   msg = document.querySelector("#messageInp").value;
-  socket.emit("messageChat", msg);
+  socket.emit("messageChat", msg, (callReturn) => {
+    if (callReturn === "ERROR") {
+      return console.log("Bad words arent allowed");
+    }
+    console.log("The message was delivered!" + callReturn);
+  });
 });
 
 document.querySelector("#send-location").addEventListener("click", () => {
@@ -22,6 +27,8 @@ document.querySelector("#send-location").addEventListener("click", () => {
   }
 
   navigator.geolocation.getCurrentPosition((position) => {
-    socket.emit("sendLocation", position);
+    socket.emit("sendLocation", position, () => {
+      console.log("Location shared!");
+    });
   });
 });
