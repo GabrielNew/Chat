@@ -28,6 +28,12 @@ io.on("connection", (socket) => {
     io.emit("message", message);
   });
 
+  socket.on("sendLocation", (location) => {
+    let link = `https://www.google.com/maps/search/?api=1&${location.coords.latitude},${location.coords.longitude}`;
+    let msg = `Location: lat is ${location.coords.latitude}, long is ${location.coords.longitude}`;
+    io.emit("message", link);
+  });
+
   socket.on("disconnect", () => {
     io.emit("message", "A user has left!");
   });

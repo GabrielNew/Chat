@@ -15,3 +15,13 @@ document.querySelector("#btnSendMessage").addEventListener("click", (e) => {
   msg = document.querySelector("#messageInp").value;
   socket.emit("messageChat", msg);
 });
+
+document.querySelector("#send-location").addEventListener("click", () => {
+  if (!navigator.geolocation) {
+    return alert("Your browser doesn't provide geolocation");
+  }
+
+  navigator.geolocation.getCurrentPosition((position) => {
+    socket.emit("sendLocation", position);
+  });
+});
