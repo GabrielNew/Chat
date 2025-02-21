@@ -1,6 +1,8 @@
 const socket = io();
 
-let msg = "";
+const $messageForm = document.querySelector("#message-form");
+const $messageFormInput = $messageForm.querySelector("input");
+const $messageFormBtn = $messageForm.querySelector("button");
 
 socket.on("welcomeMessage", (message) => {
   console.log("The message received was: " + message);
@@ -10,10 +12,14 @@ socket.on("message", (message) => {
   console.log(message);
 });
 
-document.querySelector("#btnSendMessage").addEventListener("click", (e) => {
+$messageForm.addEventListener("submit", (e) => {
   e.preventDefault();
-  msg = document.querySelector("#messageInp").value;
+  $messageFormBtn.setAttribute("disabled", "disabled");
+  const msg = $messageFormInput.value;
   socket.emit("messageChat", msg, (callReturn) => {
+    $messageFormBtn.removeAttribute("disabled");
+    $messageFormInput.value = "";
+    $messageFormInput.focus();
     if (callReturn === "ERROR") {
       return console.log("Bad words arent allowed");
     }
