@@ -4,6 +4,7 @@ import { fileURLToPath } from "url";
 import http from "http";
 import { Server } from "socket.io";
 import { Filter } from "bad-words";
+import generateMessages from "../src/utils/messages.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -22,8 +23,8 @@ app.get("/", (req, res) => {
 });
 
 io.on("connection", (socket) => {
-  socket.emit("welcomeMessage", "Welcome to the chat!");
-  socket.broadcast.emit("message", "A new user has joined!");
+  socket.emit("message", generateMessages("Welcome"));
+  socket.broadcast.emit("message", generateMessages("A new user has joined!"));
 
   socket.on("messageChat", (message, callback) => {
     const filter = new Filter();
@@ -31,19 +32,12 @@ io.on("connection", (socket) => {
     if (filter.isProfane(message)) {
       return callback("ERROR");
     }
-    io.emit("message", message);
+    io.emit("message", generateMessages(message));
     callback("Delivered");
   });
 
-  socket.on("sendLocation", (location, callback) => {
-    let link = `https://www.google.com/maps/search/?api=1&${location.coords.latitude},${location.coords.longitude}`;
-    let msg = `Location: lat is ${location.coords.latitude}, long is ${location.coords.longitude}`;
-    io.emit("message", link);
-    callback();
-  });
-
   socket.on("disconnect", () => {
-    io.emit("message", "A user has left!");
+    io.emit("message", generateMessages("A user has left!"));
   });
 });
 
