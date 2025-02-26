@@ -6,6 +6,10 @@ const $messageFormBtn = $messageForm.querySelector("button");
 const $messages = document.querySelector("#messages");
 const messageTemplate = document.querySelector("#message-template").innerHTML;
 
+const { username, room } = Qs.parse(location.search, {
+  ignoreQueryPrefix: true,
+});
+
 socket.on("welcomeMessage", (message) => {
   console.log("The message received was: " + message);
 });
@@ -33,3 +37,5 @@ $messageForm.addEventListener("submit", (e) => {
     console.log("The message was delivered!" + callReturn);
   });
 });
+
+socket.emit("join", { username, room });

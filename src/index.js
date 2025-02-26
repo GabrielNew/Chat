@@ -23,8 +23,14 @@ app.get("/", (req, res) => {
 });
 
 io.on("connection", (socket) => {
-  socket.emit("message", generateMessages("Welcome"));
-  socket.broadcast.emit("message", generateMessages("A new user has joined!"));
+  socket.on("join", ({ username, room }) => {
+    socket.join(room);
+
+    socket.emit("message", generateMessages("Welcome"));
+    socket.broadcast
+      .to(room)
+      .emit("message", generateMessages(`${username} has joined!`));
+  });
 
   socket.on("messageChat", (message, callback) => {
     const filter = new Filter();
