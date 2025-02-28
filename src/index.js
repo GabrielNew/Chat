@@ -5,6 +5,7 @@ import http from "http";
 import { Server } from "socket.io";
 import { Filter } from "bad-words";
 import generateMessages from "../src/utils/messages.js";
+import { addUser, getUser, getUsersInRoom, removeUser } from "./utils/users.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -23,13 +24,21 @@ app.get("/", (req, res) => {
 });
 
 io.on("connection", (socket) => {
-  socket.on("join", ({ username, room }) => {
-    socket.join(room);
+  socket.on("join", ({ username, room }, callback) => {
+    const { error, user } = addUser({ id: socket.id, username, room });
+
+    if (error) {
+      return callback(error);
+    }
+
+    socket.join(user.room);
 
     socket.emit("message", generateMessages("Welcome"));
     socket.broadcast
-      .to(room)
-      .emit("message", generateMessages(`${username} has joined!`));
+      .to(user.room)
+      .emit("message", generateMessages(`${user.username} has joined!`));
+
+    callback();
   });
 
   socket.on("messageChat", (message, callback) => {
@@ -43,7 +52,14 @@ io.on("connection", (socket) => {
   });
 
   socket.on("disconnect", () => {
-    io.emit("message", generateMessages("A user has left!"));
+    const user = removeUser(socket.id);
+
+    if (user) {
+      io.to(user.room).emit(
+        "message",
+        generateMessages(`${user.username} has left!`)
+      );
+    }
   });
 });
 

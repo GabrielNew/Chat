@@ -47,3 +47,5 @@ const getUsersInRoom = (room) => {
     return user.room === room.toLowerCase();
   });
 };
+
+export { addUser, getUser, getUsersInRoom, removeUser };
