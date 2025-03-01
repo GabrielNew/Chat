@@ -33,21 +33,27 @@ io.on("connection", (socket) => {
 
     socket.join(user.room);
 
-    socket.emit("message", generateMessages("Welcome"));
+    socket.emit("message", generateMessages(undefined, "Welcome"));
     socket.broadcast
       .to(user.room)
       .emit("message", generateMessages(`${user.username} has joined!`));
+
+    io.to(user.room).emit("roomData", {
+      room: user.room,
+      users: getUsersInRoom(user.room),
+    });
 
     callback();
   });
 
   socket.on("messageChat", (message, callback) => {
+    const user = getUser(socket.id);
     const filter = new Filter();
 
     if (filter.isProfane(message)) {
       return callback("ERROR");
     }
-    io.emit("message", generateMessages(message));
+    io.to(user.room).emit("message", generateMessages(user.username, message));
     callback("Delivered");
   });
 
@@ -57,8 +63,12 @@ io.on("connection", (socket) => {
     if (user) {
       io.to(user.room).emit(
         "message",
-        generateMessages(`${user.username} has left!`)
+        generateMessages(undefined, `${user.username} has left!`)
       );
+      io.to(user.room).emit("roomData", {
+        room: user.room,
+        users: getUsersInRoom(user.room),
+      });
     }
   });
 });
